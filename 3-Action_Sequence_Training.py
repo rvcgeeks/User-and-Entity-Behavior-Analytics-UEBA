@@ -1,14 +1,14 @@
 # -*- coding: UTF-8 -*-
-from keras.models import Sequential,load_model,Model
-from keras.layers import Dense, Activation,Embedding,Conv2D,MaxPooling2D,Reshape,BatchNormalization,Dropout,Input,concatenate,GlobalAveragePooling2D,Flatten,ConvLSTM2D,ConvLSTM2DCell,LSTM,Conv3D
-from keras.optimizers import adam
+from tensorflow.keras.models import Sequential,load_model,Model
+from tensorflow.keras.layers import Dense, Activation,Embedding,Conv2D,MaxPooling2D,Reshape,BatchNormalization,Dropout,Input,concatenate,GlobalAveragePooling2D,Flatten,LSTM,Conv3D
+from tensorflow.keras.optimizers import Adam
 import numpy as np 
 import linecache
 import os
 import tensorflow as tf 
-from keras import losses
-from keras import losses,metrics
-from keras.callbacks import TensorBoard, ModelCheckpoint
+from tensorflow.keras import losses
+from tensorflow.keras import losses,metrics
+from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 import matplotlib.pyplot as plt
 import warnings 
 
@@ -96,33 +96,6 @@ def test(files_test,save_path,predict_save):
     pred=np.where(pred>0,pred,0)
     np.savetxt(predict_save,pred,fmt='%f',delimiter=',')
 
-#  ------- define my loss 
-def my_loss_forFeatures(label_test,predict_save,myloss_save,figure_save):
-    y_true=np.loadtxt(label_test,delimiter=',')
-    y_pred=np.loadtxt(predict_save,delimiter=',')
-    batch_size=np.shape(y_pred)[0]
-    paras=np.array([1.2,1,0.2,0,0,0,0,1,0.1,1.2,\
-                        2,1,1.5,\
-                        0.5,1,1,0.5,0.1,0.7,\
-                        0.5,1,1,0.5,0.1,0.7,\
-                        0.5,1,1,0.5,0.1,0.7,\
-                        0.5,1,1,0.5,0.1,0.7])
-    All_loss=[]
-    for i in range(batch_size):
-        # Times=np.square(((y_pred[i]+0.6).astype(np.int32)-y_true[i]))
-        # ---- Original 
-        Times=np.square(np.multiply((y_pred[i]-y_true[i]),paras))
-        sums=Times.sum()/37
-        All_loss.append(sums)
-    x_list=range(0,batch_size)    
-    np.savetxt(myloss_save,All_loss,fmt='%f',delimiter=',')
-    # --------- draw pictures 
-    plt.figure()
-    plt.plot(x_list,All_loss)
-    # plt.show()
-    plt.savefig(figure_save)
-        # print(np.shape(loss))
-
 def Calculate_deviations(files_test,label_test,save_path,loss_save,figure_save,action_length):
     x_test=np.loadtxt(files_test,delimiter=',')
     y_test=np.loadtxt(label_test,delimiter=',')
@@ -156,38 +129,36 @@ if __name__ == "__main__":
     # user_sets={'EDB0714':29,'TNM0961':32,'HXL0968':33}
 
     # -------- run model for every user separately or it will report errors because of the cache ----------- 
-    user_sets={'EDB0714':29}
-    # user_sets={'TNM0961':32}
-    # user_sets={'HXL0968':33}
-    
-    # ----------save the best model
-    for username,length in user_sets.items():
-        USERNAME=username
-        action_length=length
+    for user_sets in [{'EDB0714':29}, {'TNM0961':32}, {'HXL0968':33}]:
+        print(user_sets)
+        # ----------save the best model
+        for username,length in user_sets.items():
+            USERNAME=username
+            action_length=length
 
-        folder='Data/'+ USERNAME +'/Model/Action/'
-        save_path=folder+'model.h5'
-        files_train='Data/'+ USERNAME+'/sequence/'+'data_train.csv'
-        labels_train='Data/'+USERNAME+'/sequence/'+'label_train.csv'
-        files_test='Data/'+USERNAME+'/sequence/'+'data_test.csv'
-        label_test='Data/'+USERNAME+'/sequence/'+'label_test.csv'
-        predict_save='Data/'+USERNAME+'/sequence/'+'predict.csv'
-        loss_save='Data/'+USERNAME+'/sequence/'+'loss.csv'
-        figure_save='Data/'+USERNAME+'/sequence/'+'loss.jpg'
-        path_check(folder)
+            folder='Data/'+ USERNAME +'/Model/Action/'
+            save_path=folder+'model.h5'
+            files_train='Data/'+ USERNAME+'/sequence/'+'data_train.csv'
+            labels_train='Data/'+USERNAME+'/sequence/'+'label_train.csv'
+            files_test='Data/'+USERNAME+'/sequence/'+'data_test.csv'
+            label_test='Data/'+USERNAME+'/sequence/'+'label_test.csv'
+            predict_save='Data/'+USERNAME+'/sequence/'+'predict.csv'
+            loss_save='Data/'+USERNAME+'/sequence/'+'loss.csv'
+            figure_save='Data/'+USERNAME+'/sequence/'+'loss.jpg'
+            path_check(folder)
 
-        # ------------------------- 运行模型 (trining model)-------------------------
-        train(files_train,labels_train,save_path,files_test,predict_save,action_length)
-        
+            # ------------------------- 运行模型 (trining model)-------------------------
+            train(files_train,labels_train,save_path,files_test,predict_save,action_length)
 
-# ---------------- calculate all deviations for all data(train+test)
-        predict_save='Data/'+USERNAME+'/sequence/'+'predict_all.csv'
-        files_all='Data/'+USERNAME+'/sequence/'+'data_all.csv'
-        labels_all='Data/'+USERNAME+'/sequence/'+'label_all.csv'
-        loss_save='Data/'+USERNAME+'/sequence/'+'loss_all.csv'
-        figure_save='Data/'+USERNAME+'/sequence/'+'loss_all.jpg'
-        
-        Calculate_deviations(files_all,labels_all,save_path,loss_save,figure_save,action_length)
+
+    # ---------------- calculate all deviations for all data(train+test)
+            predict_save='Data/'+USERNAME+'/sequence/'+'predict_all.csv'
+            files_all='Data/'+USERNAME+'/sequence/'+'data_all.csv'
+            labels_all='Data/'+USERNAME+'/sequence/'+'label_all.csv'
+            loss_save='Data/'+USERNAME+'/sequence/'+'loss_all.csv'
+            figure_save='Data/'+USERNAME+'/sequence/'+'loss_all.jpg'
+
+            Calculate_deviations(files_all,labels_all,save_path,loss_save,figure_save,action_length)
 
 # -----------------------------------------
 

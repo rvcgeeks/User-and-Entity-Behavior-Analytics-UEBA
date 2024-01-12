@@ -114,7 +114,7 @@ def generate_data(data_all,label_all,files_name):
     label_save.close()
     
 # step two----------------------------------------------- 划分 train and test ---------------------------------------------
-def train_test_generate(data_all,label_all,train_data_save,train_label_save,test_data_save,test_label_save,rate=0.8):
+def train_test_generate(data_all,label_all,train_data_save,train_label_save,test_data_save,test_label_save,sequence_dates,sequence_dates_train,sequence_dates_test,rate=0.8):
     '''
     we extract 'rate' (the defaults is 0.8) percent data for training, and the rest for testing. 
     
@@ -122,23 +122,31 @@ def train_test_generate(data_all,label_all,train_data_save,train_label_save,test
     
     data_in=open(data_all,'r')
     label_in=open(label_all,'r')
+    dates=open(sequence_dates,'r')
     data_train=open(train_data_save,'wt')
     data_test=open(test_data_save,'wt')
     label_train=open(train_label_save,'wt')
     label_test=open(test_label_save,'wt')
+    dates_train=open(sequence_dates_train,'wt')
+    dates_test=open(sequence_dates_test,'wt')
     data_num=count_line(data_all)
     train_num=data_num*rate
     # print(train_num)
     index=0
-    for line in data_in:
+    for line,date in zip(data_in,dates):
         if index<train_num:
+            dates_train.writelines(date)
             data_train.writelines(line)
         else:
+            dates_test.writelines(date)
             data_test.writelines(line)
         index=index+1
 
+    print('%s/%s for training' % (train_num+1, index))
     data_train.close()
     data_test.close()
+    dates_train.close()
+    dates_test.close()
 
     index=0
     for label in label_in:
@@ -159,40 +167,41 @@ if __name__ == "__main__":
 
     USERNAME=''
     # ---------- run change the types below and run again ------
-    # types='ActionSequence'
-    types='FeatureMap' 
+    for types in ['FeatureMap', 'ActionSequence']:
+        # ----------- generate data for every user  ----------------
+        user_sets=['EDB0714','TNM0961','HXL0968'] # 29 32 33
+        for username in user_sets:
+            USERNAME=username
+            print(types, username)
+            sequence_dates='Data/'+USERNAME+'/sequence/sequence_dates.csv'
+            sequence_dates_train='Data/'+USERNAME+'/sequence/sequence_dates_train.csv'
+            sequence_dates_test='Data/'+USERNAME+'/sequence/sequence_dates_test.csv'
+            if types=='FeatureMap':
+                # -------- file_name for feture map
+                files_name='Data/'+USERNAME+'/feature/data_out.csv'
+                data_all='Data/'+USERNAME+'/feature/data_all.csv'
+                label_all='Data/'+USERNAME+'/feature/label_all.csv'
+                data_train='Data/'+USERNAME+'/feature/data_train.csv'
+                data_test='Data/'+USERNAME+'/feature/data_test.csv'
+                label_train='Data/'+USERNAME+'/feature/label_train.csv'
+                label_test='Data/'+USERNAME+'/feature/label_test.csv'
+                # -------- file_name for action sequence
+            elif types=='ActionSequence' :
+                files_name='Data/'+USERNAME+'/sequence/sequence_code.csv'
+                data_all='Data/'+USERNAME+'/sequence/data_all.csv'
+                label_all='Data/'+USERNAME+'/sequence/label_all.csv'
+                data_train='Data/'+USERNAME+'/sequence/data_train.csv'
+                data_test='Data/'+USERNAME+'/sequence/data_test.csv'
+                label_train='Data/'+USERNAME+'/sequence/label_train.csv'
+                label_test='Data/'+USERNAME+'/sequence/label_test.csv'
+            else :
+                exit('Wrong type! Please check the settings!')
 
-    # ----------- generate data for every user  ----------------
-    user_sets=['EDB0714','TNM0961','HXL0968'] # 29 32 33
-    for username in user_sets:
-        USERNAME=username
-        if types=='FeatureMap':
-            # -------- file_name for feture map
-            files_name='Data/'+USERNAME+'/feature/data_out.csv'
-            data_all='Data/'+USERNAME+'/feature/data_all.csv'
-            label_all='Data/'+USERNAME+'/feature/label_all.csv'
-            data_train='Data/'+USERNAME+'/feature/data_train.csv'
-            data_test='Data/'+USERNAME+'/feature/data_test.csv'
-            label_train='Data/'+USERNAME+'/feature/label_train.csv'
-            label_test='Data/'+USERNAME+'/feature/label_test.csv'
-            # -------- file_name for action sequence 
-        elif types=='ActionSequence' :
-            files_name='Data/'+USERNAME+'/sequence/sequence_code.csv'
-            data_all='Data/'+USERNAME+'/sequence/data_all.csv'
-            label_all='Data/'+USERNAME+'/sequence/label_all.csv'
-            data_train='Data/'+USERNAME+'/sequence/data_train.csv'
-            data_test='Data/'+USERNAME+'/sequence/data_test.csv'
-            label_train='Data/'+USERNAME+'/sequence/label_train.csv'
-            label_test='Data/'+USERNAME+'/sequence/label_test.csv'   
-        else :
-            exit('Wrong type! Please check the settings!')
-
-
-        data_clean(data_all,label_all)
-        # generate the data for deep learning model
-        generate_data(data_all,label_all,files_name)
-        # extract training data and test data
-        train_test_generate(data_all,label_all,data_train,label_train,data_test,label_test,rate=0.7)
+            data_clean(data_all,label_all)
+            # generate the data for deep learning model
+            generate_data(data_all,label_all,files_name)
+            # extract training data and test data
+            train_test_generate(data_all,label_all,data_train,label_train,data_test,label_test,sequence_dates,sequence_dates_train,sequence_dates_test,rate=0.7)
 
 
                 

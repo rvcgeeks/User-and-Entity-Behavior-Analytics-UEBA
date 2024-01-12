@@ -1,12 +1,12 @@
-from keras.models import Sequential,load_model,Model
-from keras.layers import Dense, Activation,Embedding,Conv2D,MaxPooling2D,Reshape,BatchNormalization,Dropout,Input,concatenate,GlobalAveragePooling2D,Flatten,ConvLSTM2D,ConvLSTM2DCell,LSTM,Conv3D
-from keras.optimizers import adam
+from tensorflow.keras.models import Sequential,load_model,Model
+from tensorflow.keras.layers import Dense, Activation,Embedding,Conv2D,MaxPooling2D,Reshape,BatchNormalization,Dropout,Input,concatenate,GlobalAveragePooling2D,Flatten,ConvLSTM2D,LSTM,Conv3D
+from tensorflow.keras.optimizers import Adam
 import numpy as np 
 import linecache
 import tensorflow as tf 
 import os
-from keras import losses,metrics
-from keras.callbacks import TensorBoard, ModelCheckpoint
+from tensorflow.keras import losses,metrics
+from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 import matplotlib.pyplot as plt
 
 
@@ -128,22 +128,17 @@ def test(files_test,save_path,predict_save):
 
 
 #  define my loss
-def my_loss_forFeatures(label_test,predict_save,myloss_save,figure_save):
+def my_loss_forFeatures(label_test,predict_save,myloss_save,figure_save,dd_weights_fn):
     y_true=np.loadtxt(label_test,delimiter=',')
     y_pred=np.loadtxt(predict_save,delimiter=',')
+    dd_weights=np.loadtxt(dd_weights_fn,delimiter=',')
     batch_size=np.shape(y_pred)[0]
-    paras=np.array([1.2,1,0.2,0,0,0,0,1,0.1,1.2,\
-                        2,1,1.5,\
-                        0.5,1,1,0.5,0.1,0.7,\
-                        0.5,1,1,0.5,0.1,0.7,\
-                        0.5,1,1,0.5,0.1,0.7,\
-                        0.5,1,1,0.5,0.1,0.7])
     All_loss=[]
     for i in range(batch_size):
         # times=np.square(((y_pred[i]+0.6).astype(np.int32)-y_true[i]))
         # ---- Original 
-        times=np.square(np.multiply((y_pred[i]-y_true[i]),paras))
-        sums=times.sum()/37
+        times=np.square(np.multiply((y_pred[i]-y_true[i]),dd_weights))
+        sums=times.sum()/dd_weights.shape[0]
         All_loss.append(sums)
     x_list=range(0,batch_size)    
     np.savetxt(myloss_save,All_loss,fmt='%f',delimiter=',')
@@ -191,38 +186,38 @@ if __name__ == "__main__":
     # user_sets={'EDB0714':29,'TNM0961':32,'HXL0968':33}
 
     # -------- run model for every user separately or it will report errors because of the cache ----------- 
-    user_sets={'EDB0714':29}
-    # user_sets={'TNM0961':32}
-    # user_sets={'HXL0968':33}
+    for user_sets in [{'EDB0714':29}, {'TNM0961':32}, {'HXL0968':33}]:
+        print(user_sets)
 
-    for username,length in user_sets.items():
-        USERNAME=username 
-        folder='Data/'+ USERNAME +'/Model/Feature/'
-        save_path=folder+'model.h5'
-        files_train='Data/'+USERNAME+'/feature/'+'data_train.csv'
-        labels_train='Data/'+USERNAME+'/feature/'+'label_train.csv'
-        files_test='Data/'+USERNAME+'/feature/'+'data_test.csv'
-        predict_save='Data/'+USERNAME+'/feature/'+'predict.csv'
-        label_test='Data/'+USERNAME+'/feature/'+'label_test.csv'
-        loss_save='Data/'+USERNAME+'/feature/'+'loss.csv'
-        figure_save='Data/'+USERNAME+'/feature/'+'loss.jpg'
-        figure_my_save='Data/'+USERNAME+'/feature/'+'myloss.jpg'
-        myloss_save='Data/'+USERNAME+'/feature/'+'myloss.csv'
+        for username,length in user_sets.items():
+            USERNAME=username
+            folder='Data/'+ USERNAME +'/Model/Feature/'
+            save_path=folder+'model.h5'
+            files_train='Data/'+USERNAME+'/feature/'+'data_train.csv'
+            labels_train='Data/'+USERNAME+'/feature/'+'label_train.csv'
+            files_test='Data/'+USERNAME+'/feature/'+'data_test.csv'
+            predict_save='Data/'+USERNAME+'/feature/'+'predict.csv'
+            label_test='Data/'+USERNAME+'/feature/'+'label_test.csv'
+            loss_save='Data/'+USERNAME+'/feature/'+'loss.csv'
+            figure_save='Data/'+USERNAME+'/feature/'+'loss.jpg'
+            figure_my_save='Data/'+USERNAME+'/feature/'+'myloss.jpg'
+            myloss_save='Data/'+USERNAME+'/feature/'+'myloss.csv'
 
-        train(files_train,labels_train,save_path,files_test,predict_save)
-        # retrain(files_train,labels_train,save_path,files_test,predict_save)
+            train(files_train,labels_train,save_path,files_test,predict_save)
+            # retrain(files_train,labels_train,save_path,files_test,predict_save)
 
-# ------------ calculate all deviations for all data(train+test)
-        predict_save='Data/'+USERNAME+'/feature/'+'predict_all.csv'
-        files_all='Data/'+USERNAME+'/feature/'+'data_all.csv'
-        labels_all='Data/'+USERNAME+'/feature/'+'label_all.csv'
-        loss_save='Data/'+USERNAME+'/feature/'+'loss_all.csv'
-        figure_save='Data/'+USERNAME+'/feature/'+'loss_all.jpg'
-        figure_my_save='Data/'+USERNAME+'/feature/'+'myloss_all.jpg'
-        myloss_save='Data/'+USERNAME+'/feature/'+'myloss_all.csv'
-        test(files_all,save_path,predict_save)
-        Calculate_deviations(files_all,labels_all,save_path,loss_save,figure_save)
-        my_loss_forFeatures(labels_all,predict_save,myloss_save,figure_my_save)
+    # ------------ calculate all deviations for all data(train+test)
+            predict_save='Data/'+USERNAME+'/feature/'+'predict_all.csv'
+            files_all='Data/'+USERNAME+'/feature/'+'data_all.csv'
+            labels_all='Data/'+USERNAME+'/feature/'+'label_all.csv'
+            loss_save='Data/'+USERNAME+'/feature/'+'loss_all.csv'
+            figure_save='Data/'+USERNAME+'/feature/'+'loss_all.jpg'
+            figure_my_save='Data/'+USERNAME+'/feature/'+'myloss_all.jpg'
+            myloss_save='Data/'+USERNAME+'/feature/'+'myloss_all.csv'
+            test(files_all,save_path,predict_save)
+            Calculate_deviations(files_all,labels_all,save_path,loss_save,figure_save)
+            dd_weights_fn='Data/'+'/dd_weights_user_grp.csv'
+            my_loss_forFeatures(labels_all,predict_save,myloss_save,figure_my_save,dd_weights_fn)
 
 # ----------------------------------------------------------       
 

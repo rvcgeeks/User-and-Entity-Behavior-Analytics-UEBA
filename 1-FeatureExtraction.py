@@ -637,6 +637,7 @@ def Sequence_generate(file_in,file2_in,file3_in,file4_in):
     path_check(path)
     ActionSeq_save_path='Data/'+USERNAME+'/sequence/actions_sequence.csv'
     sequence_temp='Data/'+USERNAME+'/sequence/sequence_temp.csv'
+    sequence_dates='Data/'+USERNAME+'/sequence/sequence_dates.csv'
     sequence_code_save='Data/'+USERNAME+'/sequence/sequence_code.csv'
 
     logon_time_sequence=file_sequence(file_in,0)
@@ -648,6 +649,10 @@ def Sequence_generate(file_in,file2_in,file3_in,file4_in):
     Final_Sequence=sequence_combine(Final_Sequence,email_time_sequence)
     Final_Sequence=sequence_combine(Final_Sequence,http_time_sequence)
     max_length=sort_actions_InSequence(Final_Sequence,ActionSeq_save_path)
+
+    file_temp=open(sequence_dates,'wt')
+    file_temp.writelines('\n'.join(Final_Sequence.keys()))
+    file_temp.close()
 
     file_temp=open(sequence_temp,'wt')
     file_temp.writelines(str(Final_Sequence))

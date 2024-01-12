@@ -2,7 +2,8 @@ I choose three users' data for test. And we considered three types of features w
 ---------------------------------------
 Users： 'EDB0714','TNM0961' and 'HXL0968'
 Mix: Files mixed with three types of features for the next process.
-Role_feature.csv: the average of actions features of  all users under the role of "ProductionLineWorker".
+role_feature_user_grp.csv: the average of actions features of  all users under the role of "ProductionLineWorker".
+dd_weights_user_grp.csv: weights for features for calculating WDD for role and feature models for this particular user group.
 
 ---------------------------------------
 Every user's files:
