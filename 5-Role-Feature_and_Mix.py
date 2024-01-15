@@ -1,7 +1,7 @@
 import numpy as np 
 import linecache
 import matplotlib.pyplot as plt
-import os
+import os, json
 # from FeatureExtract import path_check
 
 
@@ -20,6 +20,8 @@ def path_check(path):
 
 def role_feature():
     file_name='/feature/data_out.csv'
+    #below entries are filtered for role ProductionLineWorker for calculating net average action features of all users as role features.
+    #these could be learnt from feedback mechanism that multiple similar role non anomalous labelled features can be considered.
     user_sets=['ASD0577', 'AAL0706', 'ASM0575', 'GCG0951', 'AAV0450', 'TDG0962', 'CCM0136', 'FRR0832', 'KPP0452', 'ABM0845', 'MJB0588', 'WJD0576', 'ILH0958', 'FEB0306', 'JJB0700', 'AHD0848', 'LDM0587', 'MLG0475', 'NCK0295', 'YJV0699',]
     All_users_features=np.zeros((37))
     # paper 16:6 In this article, we define the average of action features selected from all colleagues under the same role as role features.
@@ -82,15 +84,18 @@ if __name__ == "__main__":
 
     # ------ Calculate the role feature ---------
     # role_feature() 
-    user_sets=['EDB0714','TNM0961','HXL0968']
+    #user_sets=['EDB0714','TNM0961','HXL0968']
+    with open('Data/config.json', 'r') as fh:
+        CONFIG = json.load(fh)
     # ----- step 1  每个用户单独计算 role features 
-    for user in user_sets:
+    #user_sets={'EDB0714':'PC-6103','HXL0968':'PC-0623','TNM0961':'PC-2030'}
+    for user,subconfig in CONFIG['monitor'].items():
         feature_role_path='Data/'+ user+'/role'
         path_check(feature_role_path)
         deviations_for_users(user)
     # ------------------------------------
     # ------ step 2 每个用户的各种偏差度进行拼接 (mix data)------
-    for username in user_sets:
+    for username,subconfig in CONFIG['monitor'].items():
         user_path='Data/'+ username+'/Mix'
         path_check(user_path)
         file_feature='/feature/myloss_all.csv'

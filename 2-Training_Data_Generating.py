@@ -1,6 +1,6 @@
 import numpy as np 
 import linecache
-import os
+import os, json
 # from FeatureExtract import path_check
 
 
@@ -142,7 +142,7 @@ def train_test_generate(data_all,label_all,train_data_save,train_label_save,test
             data_test.writelines(line)
         index=index+1
 
-    print('%s/%s for training' % (train_num+1, index))
+    print('%s/%s for training' % (int(train_num)+1, index))
     data_train.close()
     data_test.close()
     dates_train.close()
@@ -165,12 +165,13 @@ def train_test_generate(data_all,label_all,train_data_save,train_label_save,test
 
 if __name__ == "__main__":
 
+    with open('Data/config.json', 'r') as fh:
+        CONFIG = json.load(fh)
     USERNAME=''
     # ---------- run change the types below and run again ------
     for types in ['FeatureMap', 'ActionSequence']:
         # ----------- generate data for every user  ----------------
-        user_sets=['EDB0714','TNM0961','HXL0968'] # 29 32 33
-        for username in user_sets:
+        for username,subconfig in CONFIG['monitor'].items():
             USERNAME=username
             print(types, username)
             sequence_dates='Data/'+USERNAME+'/sequence/sequence_dates.csv'

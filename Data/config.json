@@ -1,0 +1,44 @@
+{
+    "monitor.timerange": {
+        "start": "01/04/2010 00:00:00",
+        "end": "12/16/2010 00:00:00"
+    },
+    "monitor.inputdata": {
+        "device.csv": {
+            "user_index": 2
+        },
+        "file.csv": {
+            "user_index": 2
+        },
+        "logon.csv": {
+            "user_index": 2
+        },
+        "email.csv": {
+            "user_index": 2
+        },
+        "http.csv": {
+            "user_index": 2
+        },
+        "psychometric.csv": {
+            "user_index": 1
+        }
+    },
+    "monitor": {
+        "EDB0714": {
+            "base_host": "PC-6103",
+            "max_seq_len": -1
+        },
+        "HXL0968": {
+            "base_host": "PC-0623",
+            "max_seq_len": -1
+        },
+        "TNM0961": {
+            "base_host": "PC-2030",
+            "max_seq_len": -1
+        },
+        "MLM0950": {
+            "base_host": "PC-9787",
+            "max_seq_len": -1
+        }
+    }
+}

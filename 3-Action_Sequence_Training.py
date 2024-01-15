@@ -4,7 +4,7 @@ from tensorflow.keras.layers import Dense, Activation,Embedding,Conv2D,MaxPoolin
 from tensorflow.keras.optimizers import Adam
 import numpy as np 
 import linecache
-import os
+import os, json
 import tensorflow as tf 
 from tensorflow.keras import losses
 from tensorflow.keras import losses,metrics
@@ -129,37 +129,37 @@ if __name__ == "__main__":
     # user_sets={'EDB0714':29,'TNM0961':32,'HXL0968':33}
 
     # -------- run model for every user separately or it will report errors because of the cache ----------- 
-    for user_sets in [{'EDB0714':29}, {'TNM0961':32}, {'HXL0968':33}]:
-        print(user_sets)
-        # ----------save the best model
-        for username,length in user_sets.items():
-            USERNAME=username
-            action_length=length
+    with open('Data/config.json', 'r') as fh:
+        CONFIG = json.load(fh)
+    for username,subconfig in CONFIG['monitor'].items():
+        USERNAME=username
+        action_length=subconfig['max_seq_len']
+        print(USERNAME, action_length)
 
-            folder='Data/'+ USERNAME +'/Model/Action/'
-            save_path=folder+'model.h5'
-            files_train='Data/'+ USERNAME+'/sequence/'+'data_train.csv'
-            labels_train='Data/'+USERNAME+'/sequence/'+'label_train.csv'
-            files_test='Data/'+USERNAME+'/sequence/'+'data_test.csv'
-            label_test='Data/'+USERNAME+'/sequence/'+'label_test.csv'
-            predict_save='Data/'+USERNAME+'/sequence/'+'predict.csv'
-            loss_save='Data/'+USERNAME+'/sequence/'+'loss.csv'
-            figure_save='Data/'+USERNAME+'/sequence/'+'loss.jpg'
-            path_check(folder)
+        folder='Data/'+ USERNAME +'/Model/Action/'
+        save_path=folder+'model.h5'
+        files_train='Data/'+ USERNAME+'/sequence/'+'data_train.csv'
+        labels_train='Data/'+USERNAME+'/sequence/'+'label_train.csv'
+        files_test='Data/'+USERNAME+'/sequence/'+'data_test.csv'
+        label_test='Data/'+USERNAME+'/sequence/'+'label_test.csv'
+        predict_save='Data/'+USERNAME+'/sequence/'+'predict.csv'
+        loss_save='Data/'+USERNAME+'/sequence/'+'loss.csv'
+        figure_save='Data/'+USERNAME+'/sequence/'+'loss.jpg'
+        path_check(folder)
 
-            # ------------------------- 运行模型 (trining model)-------------------------
-            train(files_train,labels_train,save_path,files_test,predict_save,action_length)
+        actions_sequence_file='Data/'+USERNAME+'/sequence/'+'actions_sequence.csv'
+
+        # ------------------------- 运行模型 (trining model)-------------------------
+        train(files_train,labels_train,save_path,files_test,predict_save,action_length)
 
 
-    # ---------------- calculate all deviations for all data(train+test)
-            predict_save='Data/'+USERNAME+'/sequence/'+'predict_all.csv'
-            files_all='Data/'+USERNAME+'/sequence/'+'data_all.csv'
-            labels_all='Data/'+USERNAME+'/sequence/'+'label_all.csv'
-            loss_save='Data/'+USERNAME+'/sequence/'+'loss_all.csv'
-            figure_save='Data/'+USERNAME+'/sequence/'+'loss_all.jpg'
+        # ---------------- calculate all deviations for all data(train+test)
+        predict_save='Data/'+USERNAME+'/sequence/'+'predict_all.csv'
+        files_all='Data/'+USERNAME+'/sequence/'+'data_all.csv'
+        labels_all='Data/'+USERNAME+'/sequence/'+'label_all.csv'
+        loss_save='Data/'+USERNAME+'/sequence/'+'loss_all.csv'
+        figure_save='Data/'+USERNAME+'/sequence/'+'loss_all.jpg'
 
-            Calculate_deviations(files_all,labels_all,save_path,loss_save,figure_save,action_length)
+        Calculate_deviations(files_all,labels_all,save_path,loss_save,figure_save,action_length)
 
-# -----------------------------------------
-
-# -----------------------------------------------------------------
+    # -----------------------------------------

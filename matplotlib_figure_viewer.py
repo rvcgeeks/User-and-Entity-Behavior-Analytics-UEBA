@@ -10,7 +10,6 @@ filename = askopenfilename(initialdir = path.dirname(__file__), filetypes=[("Mat
 print(filename)
 
 fig = pickle.load(open(filename, 'rb'))
-
 dummy = plt.figure()
 new_manager = dummy.canvas.manager
 new_manager.canvas.figure = fig

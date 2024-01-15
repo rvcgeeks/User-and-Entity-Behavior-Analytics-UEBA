@@ -2,6 +2,8 @@
 set +x
 
 
+#python3 0-Sample_Data_from_CERT.py
+
 python3 1-FeatureExtraction.py
 python3 2-Training_Data_Generating.py
 

@@ -2,6 +2,8 @@
 set WD=%~dp0
 cd "%WD%"
 
+::py 0-Sample_Data_from_CERT.py
+
 py 1-FeatureExtraction.py
 py 2-Training_Data_Generating.py
 

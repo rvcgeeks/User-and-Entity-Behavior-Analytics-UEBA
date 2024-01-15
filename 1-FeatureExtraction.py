@@ -1,6 +1,6 @@
 from datetime import datetime
 import numpy as np 
-import os
+import os, json
 # from FeatureExtract import path_check
 
 # ------------------------------------------ STEP TWO 
@@ -659,6 +659,7 @@ def Sequence_generate(file_in,file2_in,file3_in,file4_in):
     file_temp.close()
     # -------------- sequence code (特征数字化)    
     sequence_code(ActionSeq_save_path,sequence_code_save,max_length)
+    return max_length
 
     # --------------------------
 
@@ -669,10 +670,12 @@ if __name__ == "__main__":
     # MACHINE='PC-0623'
     # for username in user_sets:
     #     USERNAME=username
-    user_sets={'EDB0714':'PC-6103','HXL0968':'PC-0623','TNM0961':'PC-2030'}
-    for username,machine in user_sets.items():
+    with open('Data/config.json', 'r') as fh:
+        CONFIG = json.load(fh)
+    #user_sets={'EDB0714':'PC-6103','HXL0968':'PC-0623','TNM0961':'PC-2030'}
+    for username,subconfig in CONFIG['monitor'].items():
         USERNAME=username
-        MACHINE=machine
+        MACHINE=subconfig['base_host']
         # print(USERNAME)
         file_in='Data/'+USERNAME+'/new/logon2.csv'
         file2_in='Data/'+USERNAME+'/new/device2.csv'
@@ -684,4 +687,7 @@ if __name__ == "__main__":
         # generate the feature for daily behaviors.
         Feature_generate(file_in,file2_in,file3_in,file4_in)
         # generate the sequence data for daily action sequences.
-        Sequence_generate(file_in,file2_in,file3_in,file4_in)
+        max_length = Sequence_generate(file_in,file2_in,file3_in,file4_in)
+        subconfig['max_seq_len']=max_length
+    with open('Data/config.json', 'w') as fh:
+        json.dump(CONFIG, fh, indent=4)

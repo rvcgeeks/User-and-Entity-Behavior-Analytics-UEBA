@@ -4,7 +4,7 @@ from tensorflow.keras.optimizers import Adam
 import numpy as np 
 import linecache
 import tensorflow as tf 
-import os
+import os, json
 from tensorflow.keras import losses,metrics
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 import matplotlib.pyplot as plt
@@ -186,38 +186,37 @@ if __name__ == "__main__":
     # user_sets={'EDB0714':29,'TNM0961':32,'HXL0968':33}
 
     # -------- run model for every user separately or it will report errors because of the cache ----------- 
-    for user_sets in [{'EDB0714':29}, {'TNM0961':32}, {'HXL0968':33}]:
-        print(user_sets)
+    with open('Data/config.json', 'r') as fh:
+        CONFIG = json.load(fh)
+    for username,subconfig in CONFIG['monitor'].items():
+        USERNAME=username
+        print(USERNAME)
+        folder='Data/'+ USERNAME +'/Model/Feature/'
+        save_path=folder+'model.h5'
+        files_train='Data/'+USERNAME+'/feature/'+'data_train.csv'
+        labels_train='Data/'+USERNAME+'/feature/'+'label_train.csv'
+        files_test='Data/'+USERNAME+'/feature/'+'data_test.csv'
+        predict_save='Data/'+USERNAME+'/feature/'+'predict.csv'
+        label_test='Data/'+USERNAME+'/feature/'+'label_test.csv'
+        loss_save='Data/'+USERNAME+'/feature/'+'loss.csv'
+        figure_save='Data/'+USERNAME+'/feature/'+'loss.jpg'
+        figure_my_save='Data/'+USERNAME+'/feature/'+'myloss.jpg'
+        myloss_save='Data/'+USERNAME+'/feature/'+'myloss.csv'
 
-        for username,length in user_sets.items():
-            USERNAME=username
-            folder='Data/'+ USERNAME +'/Model/Feature/'
-            save_path=folder+'model.h5'
-            files_train='Data/'+USERNAME+'/feature/'+'data_train.csv'
-            labels_train='Data/'+USERNAME+'/feature/'+'label_train.csv'
-            files_test='Data/'+USERNAME+'/feature/'+'data_test.csv'
-            predict_save='Data/'+USERNAME+'/feature/'+'predict.csv'
-            label_test='Data/'+USERNAME+'/feature/'+'label_test.csv'
-            loss_save='Data/'+USERNAME+'/feature/'+'loss.csv'
-            figure_save='Data/'+USERNAME+'/feature/'+'loss.jpg'
-            figure_my_save='Data/'+USERNAME+'/feature/'+'myloss.jpg'
-            myloss_save='Data/'+USERNAME+'/feature/'+'myloss.csv'
+        train(files_train,labels_train,save_path,files_test,predict_save)
+        # retrain(files_train,labels_train,save_path,files_test,predict_save)
 
-            train(files_train,labels_train,save_path,files_test,predict_save)
-            # retrain(files_train,labels_train,save_path,files_test,predict_save)
+        # ------------ calculate all deviations for all data(train+test)
+        predict_save='Data/'+USERNAME+'/feature/'+'predict_all.csv'
+        files_all='Data/'+USERNAME+'/feature/'+'data_all.csv'
+        labels_all='Data/'+USERNAME+'/feature/'+'label_all.csv'
+        loss_save='Data/'+USERNAME+'/feature/'+'loss_all.csv'
+        figure_save='Data/'+USERNAME+'/feature/'+'loss_all.jpg'
+        figure_my_save='Data/'+USERNAME+'/feature/'+'myloss_all.jpg'
+        myloss_save='Data/'+USERNAME+'/feature/'+'myloss_all.csv'
+        test(files_all,save_path,predict_save)
+        Calculate_deviations(files_all,labels_all,save_path,loss_save,figure_save)
+        dd_weights_fn='Data/'+'/dd_weights_user_grp.csv'
+        my_loss_forFeatures(labels_all,predict_save,myloss_save,figure_my_save,dd_weights_fn)
 
-    # ------------ calculate all deviations for all data(train+test)
-            predict_save='Data/'+USERNAME+'/feature/'+'predict_all.csv'
-            files_all='Data/'+USERNAME+'/feature/'+'data_all.csv'
-            labels_all='Data/'+USERNAME+'/feature/'+'label_all.csv'
-            loss_save='Data/'+USERNAME+'/feature/'+'loss_all.csv'
-            figure_save='Data/'+USERNAME+'/feature/'+'loss_all.jpg'
-            figure_my_save='Data/'+USERNAME+'/feature/'+'myloss_all.jpg'
-            myloss_save='Data/'+USERNAME+'/feature/'+'myloss_all.csv'
-            test(files_all,save_path,predict_save)
-            Calculate_deviations(files_all,labels_all,save_path,loss_save,figure_save)
-            dd_weights_fn='Data/'+'/dd_weights_user_grp.csv'
-            my_loss_forFeatures(labels_all,predict_save,myloss_save,figure_my_save,dd_weights_fn)
-
-# ----------------------------------------------------------       
-
+    # ----------------------------------------------------------
