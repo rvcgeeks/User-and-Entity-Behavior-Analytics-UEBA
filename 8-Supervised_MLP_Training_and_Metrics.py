@@ -1,18 +1,15 @@
-from tensorflow.keras.models import Sequential,load_model,Model
-from tensorflow.keras.layers import Dense, Activation,Embedding,Conv2D,MaxPooling2D,Reshape,BatchNormalization,Dropout,Input,concatenate,GlobalAveragePooling2D,Flatten,ConvLSTM2D,LSTM,Conv3D
-from tensorflow.keras.optimizers import Adam
-import numpy as np 
-import linecache
-from tensorflow.keras import losses,metrics
-from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
-import matplotlib.pyplot as plt
+
 import csv, json
-from sklearn.metrics import roc_curve,auc
+import linecache,pickle
+import numpy as np
+import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-import pickle
+from sklearn.metrics import roc_curve,auc
+from tensorflow.keras.models import load_model,Model
+from tensorflow.keras.layers import Input,LSTM,Dropout,Dense,BatchNormalization
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import TensorBoard,ModelCheckpoint
 
-
-# losses.binary_crossentropy
 
 def count_line(files_in):
     file_open=open(files_in,'r')

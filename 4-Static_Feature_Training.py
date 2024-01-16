@@ -1,14 +1,12 @@
-from tensorflow.keras.models import Sequential,load_model,Model
-from tensorflow.keras.layers import Dense, Activation,Embedding,Conv2D,MaxPooling2D,Reshape,BatchNormalization,Dropout,Input,concatenate,GlobalAveragePooling2D,Flatten,ConvLSTM2D,LSTM,Conv3D
-from tensorflow.keras.optimizers import Adam
-import numpy as np 
-import linecache
-import tensorflow as tf 
+# -*- coding: UTF-8 -*-
 import os, json
-from tensorflow.keras import losses,metrics
-from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
+import linecache
+import numpy as np
 import matplotlib.pyplot as plt
-
+from tensorflow.keras.models import load_model,Model
+from tensorflow.keras.layers import Input,Reshape,LSTM,ConvLSTM2D,MaxPooling2D,Dropout,Flatten,Dense
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import TensorBoard,ModelCheckpoint
 
 
 def path_check(path):
@@ -49,7 +47,7 @@ def data_generator(files_name,num_days=5,batch_size=30):
             # exit (0)
             data_batch=np.array(data_batch)
             label_batch=np.array(label_batch)
-            data_out=np.reshape(data_batch,(batch_size,192))
+            data_out=np.reshape(data_batch,(batch_size,seq_length*5*8*1))
             label_out=np.reshape(label_batch,(batch_size,48))
             i=i+batch_size+1
             yield data_out,label_out
@@ -72,14 +70,33 @@ def train(files_train,labels_train,save_path,files_test,predict_save):
     y_train=np.loadtxt(labels_train,delimiter=',')
 
     # ---------------模型结构 (model structure)---------------
-    main_input=Input(shape=(148,),dtype='float32',name='MainInput')
+    input_dims=seq_length*features_len
+    '''
+    # LSTM Model
+    main_input=Input(shape=(input_dims,),dtype='float32',name='MainInput')
     Inputs=Reshape((4,37))(main_input)
     layer=LSTM(100,return_sequences=True,activation='tanh')(Inputs)
     layer=LSTM(160,return_sequences=False,activation='tanh')(layer)
     layer=Dense(37,activation='relu')(layer)
+    '''
+    # Convolutional LSTM Model
+    input_dims_fixed=seq_length*5*8*1
+    x_train=np.pad(x_train, ((0, 0), (0, input_dims_fixed-input_dims)), mode='constant')
+
+    main_input=Input(shape=(input_dims_fixed,),dtype='float32',name='MainInput')
+    Inputs=Reshape((seq_length,5,8,1))(main_input)
+    layer=ConvLSTM2D(24,kernel_size=(2,3),return_sequences=True,activation='elu')(Inputs)
+    layer=ConvLSTM2D(128,kernel_size=(2,3),return_sequences=True,activation='tanh')(layer)
+    layer=ConvLSTM2D(48,kernel_size=(2,3),return_sequences=False,activation='tanh')(layer)
+    layer=MaxPooling2D(pool_size=(2,2),data_format='channels_last')(layer)
+    layer=Dropout(0.5)(layer)
+    layer=Flatten()(layer)
+    layer=Dense(features_len,activation='relu')(layer)
+
     output=layer
     model=Model(inputs=main_input,outputs=output)
     model.compile(optimizer='adam',loss='mse',metrics=['binary_accuracy'])
+    print(model.summary())
 
     # ------------------模型保存 (save the model)------------------
     tensorboard_path='Data/'+ USERNAME +'/Model/Feature'
@@ -89,6 +106,10 @@ def train(files_train,labels_train,save_path,files_test,predict_save):
     
     # -----------------数据预测 (data prediction )---------------------
     x_test=np.loadtxt(files_test,delimiter=',')
+
+    # If ConvLSTM2D
+    x_test=np.pad(x_test, ((0, 0), (0, input_dims_fixed-input_dims)), mode='constant')
+
     y_pred=model.predict(x_test)
     np.savetxt(predict_save,y_pred,fmt='%f',delimiter=',')
 
@@ -106,10 +127,19 @@ def retrain(files_train,labels_train,save_path,files_test,predict_save):
     tbCallback=TensorBoard(log_dir=tensorboard_path,histogram_freq=0,write_graph=True,write_grads=True,write_images=True,embeddings_freq=0,embeddings_layer_names=None,embeddings_metadata=None)
     checkpoint=ModelCheckpoint(save_path,monitor='loss',verbose=0,save_best_only='True')
 
+    # If ConvLSTM2D
+    input_dims=seq_length*features_len
+    input_dims_fixed=seq_length*5*8*1
+    x_train=np.pad(x_train, ((0, 0), (0, input_dims_fixed-input_dims)), mode='constant')
+
     model.fit(x_train,y_train,batch_size=6,epochs=800,shuffle=True,callbacks=[tbCallback,checkpoint])
     
     # ---------------- add test -------
     x_test=np.loadtxt(files_test,delimiter=',')
+
+    # If ConvLSTM2D
+    x_test=np.pad(x_test, ((0, 0), (0, input_dims_fixed-input_dims)), mode='constant')
+
     y_pred=model.predict(x_test)
     np.savetxt(predict_save,y_pred,fmt='%f',delimiter=',')
 
@@ -119,6 +149,12 @@ def test(files_test,save_path,predict_save):
     # labels_name='Data/'+username+'/feature/label_test.csv'
     x_test=np.loadtxt(files_test,delimiter=',')
     model=load_model(save_path)
+
+    # If ConvLSTM2D
+    input_dims=seq_length*features_len
+    input_dims_fixed=seq_length*5*8*1
+    x_test=np.pad(x_test, ((0, 0), (0, input_dims_fixed-input_dims)), mode='constant')
+
     pred=model.predict(x_test)
     print(np.shape(pred))
     # pred 矩阵中如果大于 0.5 保持不变，否则置 0）
@@ -149,7 +185,7 @@ def my_loss_forFeatures(label_test,predict_save,myloss_save,figure_save,dd_weigh
     plt.ylabel('WDD loss',fontsize=14)
     # plt.show()
     plt.savefig(figure_save)
-        # print(np.shape(loss))
+    # print(np.shape(loss))
 
 def Calculate_deviations(files_test,label_test,save_path,loss_save,figure_save):
     x_test=np.loadtxt(files_test,delimiter=',')
@@ -162,8 +198,14 @@ def Calculate_deviations(files_test,label_test,save_path,loss_save,figure_save):
     # exit(0)
     All_loss=[]
     x_list=range(0,len(x_test))
+    input_dims=seq_length*features_len
+    input_dims_fixed=seq_length*5*8*1
     for i in range (len(x_test)):
-        x_small_test=np.reshape(x_test[i],(1,148))
+        x_small_test=np.reshape(x_test[i],(1,input_dims))
+
+        # If ConvLSTM2D
+        x_small_test=np.pad(x_small_test, ((0, 0), (0, input_dims_fixed-input_dims)), mode='constant')
+
         y_small_test=np.reshape(y_test[i],(1,37))
         loss,acc=model.evaluate(x=x_small_test,y=y_small_test,verbose=0)
         All_loss.append(loss)
@@ -188,6 +230,8 @@ if __name__ == "__main__":
     # -------- run model for every user separately or it will report errors because of the cache ----------- 
     with open('Data/config.json', 'r') as fh:
         CONFIG = json.load(fh)
+    seq_length=4
+    features_len=37
     for username,subconfig in CONFIG['monitor'].items():
         USERNAME=username
         print(USERNAME)
