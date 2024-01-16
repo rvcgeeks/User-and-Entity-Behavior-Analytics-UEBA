@@ -40,6 +40,7 @@ def train(files_train,labels_train,model_path,files_test,label_test,predict_save
     # ------------------------
     model=Model(inputs=main_input,outputs=output)
     model.compile(optimizer='adam',loss='binary_crossentropy',metrics=['binary_accuracy'])
+    print(model.summary())
 
     tensorboard_path='./'
     tbCallback=TensorBoard(log_dir=tensorboard_path,histogram_freq=0,write_graph=True,write_grads=True,write_images=True,embeddings_freq=0,embeddings_layer_names=None,embeddings_metadata=None)
