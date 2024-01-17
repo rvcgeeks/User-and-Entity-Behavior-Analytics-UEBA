@@ -26,19 +26,19 @@
     "monitor": {
         "EDB0714": {
             "base_host": "PC-6103",
-            "max_seq_len": -1
+            "max_seq_len": 29
         },
         "HXL0968": {
             "base_host": "PC-0623",
-            "max_seq_len": -1
+            "max_seq_len": 33
         },
         "TNM0961": {
             "base_host": "PC-2030",
-            "max_seq_len": -1
+            "max_seq_len": 32
         },
         "MLM0950": {
             "base_host": "PC-9787",
-            "max_seq_len": -1
+            "max_seq_len": 24
         }
     }
 }

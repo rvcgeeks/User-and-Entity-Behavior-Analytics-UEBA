@@ -13,7 +13,7 @@ py 5-Role-Feature_and_Mix.py
 
 py 6-Unsupervised_Isolation_Forest_Training_and_Metrics.py
 
-py 7-Mix_Users_Data_and_Label.py
+py 7-Mix_Users_Data_for_MLP.py
 py 8-Supervised_MLP_Training_and_Metrics.py
 
 pause
