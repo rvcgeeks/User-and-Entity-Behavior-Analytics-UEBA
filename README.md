@@ -15,6 +15,7 @@ All data were extracted from **CERT/R4.2** &nbsp;(*ftp://ftp.sei.cmu.edu/pub/cer
 - Streamlined Step 3 and 4 (Action features and sequence models) for every user configured
 - Added scripts for running entire UEBA pipeline.
 - Added requirements.txt and made code compatable with latest version of python, tensorflow, pandas, numpy, matplotlib
+- Re Implemented Action and Sequence Feature Models using ConvLSTM2D as per paper
 
 ## Dependent Libraries
 - python greater than 3.10-64-bit
@@ -28,6 +29,7 @@ All data were extracted from **CERT/R4.2** &nbsp;(*ftp://ftp.sei.cmu.edu/pub/cer
 ## Usage
 - The repository already contains CERT data extracted for some users, details of which are in Data/config.json, however you can create your own config and execute 0-Sample_Data_from_CERT.py separately
 - Run run.bat or run.sh which runs in following steps: 1 -> 2 -> 3 -> 4 -> 5 -> 6 (unsupervised) -> 7 -> 8 (supervised).
+- To reproduce old environment as in original branch, open up anaconda prompt and create old python environment "conda create --name myenv python=3.6", activate and execute "pip install -r requirements_old.txt"
 
 *The provided features and deep learning models in this project are very simple samples, and you can add or create your own features and models based on this project.* : )
 

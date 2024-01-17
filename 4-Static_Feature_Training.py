@@ -3,10 +3,10 @@ import os, json
 import linecache
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras.models import load_model,Model
-from tensorflow.keras.layers import Input,Reshape,LSTM,ConvLSTM2D,MaxPooling2D,Dropout,Flatten,Dense
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import TensorBoard,ModelCheckpoint
+from keras.models import load_model,Model
+from keras.layers import Input,Reshape,LSTM,ConvLSTM2D,MaxPooling2D,Dropout,Flatten,Dense
+from keras.optimizers import Adam
+from keras.callbacks import TensorBoard,ModelCheckpoint
 
 
 def path_check(path):

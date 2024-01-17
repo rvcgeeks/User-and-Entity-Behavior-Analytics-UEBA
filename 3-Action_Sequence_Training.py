@@ -3,10 +3,10 @@ import os, json
 import linecache
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras.models import load_model,Model
-from tensorflow.keras.layers import Input,Reshape,LSTM,ConvLSTM2D,MaxPooling2D,Dropout,Flatten,Dense
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import TensorBoard,ModelCheckpoint
+from keras.models import load_model,Model
+from keras.layers import Input,Reshape,LSTM,ConvLSTM2D,MaxPooling2D,Dropout,Flatten,Dense
+from keras.optimizers import Adam
+from keras.callbacks import TensorBoard,ModelCheckpoint
 
 
 def path_check(path):
@@ -59,7 +59,7 @@ def train(files_train,labels_train,save_path,files_test,predict_save,action_leng
     layer=ConvLSTM2D(128,kernel_size=(2,3),return_sequences=True,activation='tanh')(layer)
     layer=ConvLSTM2D(48,kernel_size=(2,3),return_sequences=False,activation='tanh')(layer)
     layer=MaxPooling2D(pool_size=(2,2),data_format='channels_last')(layer)
-    layer=Dropout(0.5)(layer)
+    layer=Dropout(0.2)(layer)
     layer=Flatten()(layer)
     layer=Dense(action_length,activation='relu')(layer)
 

@@ -5,10 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.metrics import roc_curve,auc
-from tensorflow.keras.models import load_model,Model
-from tensorflow.keras.layers import Input,LSTM,Dropout,Dense,BatchNormalization
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import TensorBoard,ModelCheckpoint
+from keras.models import load_model,Model
+from keras.layers import Input,LSTM,Dropout,Dense,BatchNormalization
+from keras.optimizers import Adam
+from keras.callbacks import TensorBoard,ModelCheckpoint
 
 
 def count_line(files_in):
